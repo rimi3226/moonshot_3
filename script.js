@@ -1,48 +1,42 @@
-let fps = 55;
-let delay = 12;
-let humanCount = 3;
-let treeCount = 3;
+const socket = io('http://localhost:8765');
 
-function updateStats() {
-    document.getElementById('fps').textContent = fps;
-    document.getElementById('delay').textContent = delay + 'ms';
-    document.getElementById('human-count').textContent = humanCount;
-    document.getElementById('tree-count').textContent = treeCount;
+socket.on('connect', () => {
+    console.log('Connected to server');
+});
+
+socket.on('sensor_data', (data) => {
+    console.log('Sensor Data:', data);
+    // Parse data here and update the DOM elements accordingly
+    const parsedData = parseSensorData(data);
+    updateDOM(parsedData);
+});
+
+function parseSensorData(data) {
+    // Assuming data format: Humidity: 84.00% Temperature: 27.10°C 80.78°F Heat index: 30.37°C 86.67°F
+    const regex = /Humidity: (\d+.\d+)% Temperature: (\d+.\d+)°C (\d+.\d+)°F Heat index: (\d+.\d+)°C (\d+.\d+)°F/;
+    const matches = data.match(regex);
+    if (matches) {
+        return {
+            humidity: matches[1],
+            temperatureC: matches[2],
+            temperatureF: matches[3],
+            heatIndexC: matches[4],
+            heatIndexF: matches[5]
+        };
+    }
+    return null;
 }
 
-function updateSensorData() {
-    document.getElementById('temp1').textContent = (Math.random() * 5 + 18).toFixed(1) + '°C';
-    document.getElementById('temp2').textContent = (Math.random() * 5 + 18).toFixed(1) + '°C';
-    document.getElementById('humidity').textContent = (Math.random() * 10 + 40).toFixed(1) + '%';
-    console.log('Updating charts...');
+function updateDOM(data) {
+    if (data) {
+        document.getElementById('temp1').textContent = `${data.temperatureC}°C`;
+        document.getElementById('humidity').textContent = `${data.humidity}%`;
+        // Update other elements as needed
+    }
 }
 
-function updateAverages() {
-    document.getElementById('avg-temp1').textContent = (Math.random() * 3 + 17).toFixed(1) + '°C';
-    document.getElementById('avg-temp2').textContent = (Math.random() * 3 + 17).toFixed(1) + '°C';
-    document.getElementById('avg-humidity').textContent = (Math.random() * 5 + 40).toFixed(1) + '%';
-}
-
-function setupVideoStream() {
-    console.log('Setting up video stream...');
-}
-
-function simulateDataChanges() {
-    fps = Math.floor(Math.random() * 10) + 50;
-    delay = Math.floor(Math.random() * 5) + 10;
-    humanCount = Math.floor(Math.random() * 5) + 1;
-    treeCount = Math.floor(Math.random() * 5) + 1;
-    updateStats();
-}
-
-function init() {
-    setupVideoStream();
-    updateSensorData();
-    updateAverages();
-    updateStats();
-    setInterval(updateSensorData, 5000);
-    setInterval(updateAverages, 30000);
-    setInterval(simulateDataChanges, 3000);
-}
-
-window.onload = init;
+window.onload = function() {
+    // Existing init function
+    init();
+    // Additional initialization if needed
+};
