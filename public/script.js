@@ -37,6 +37,6 @@ function updateDOM(data) {
 
 window.onload = function() {
     // Existing init function
-    init();
+    // init();
     // Additional initialization if needed
 };
